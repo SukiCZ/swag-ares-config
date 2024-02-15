@@ -1,0 +1,72 @@
+# coding: utf-8
+
+{{>partial_header}}
+
+import unittest
+
+{{#models}}
+{{#model}}
+import {{modelPackage}}
+
+
+class Test{{classname}}(unittest.TestCase):
+    """{{classname}} unit test stubs"""
+
+    @classmethod
+    def setUpClass(cls):
+{{^isEnum}}
+        cls.inst_req_only = {{modelPackage}}.{{classname}}(
+            {{#vars}}
+            {{#required}}
+            {{name}}={{{example}}}{{^example}}None{{/example}},
+            {{/required}}
+            {{/vars}}
+        )
+        cls.inst_req_and_optional = {{modelPackage}}.{{classname}}(
+            {{#vars}}
+            {{name}}={{{example}}}{{^example}}None{{/example}}{{^-last}},{{/-last}}
+            {{/vars}}
+        )
+{{/isEnum}}
+{{#isEnum}}
+        inst = {{{classname}}}()
+{{/isEnum}}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+{{^isEnum}}
+    def test_to_str(self):
+        """Test {{classname}} - to_str"""
+        self.assertEqual(
+{{=<% %>=}}
+            "{<%#vars%>'<%baseName%>': %r<%^-last%>, <%/-last%><%/vars%>}" % (
+                <%#vars%>
+                self.inst_req_and_optional.<%name%>,
+                <%/vars%>
+            ),
+<%={{ }}=%>
+            self.inst_req_and_optional.to_str(),
+        )
+
+{{#vars}}
+{{#required}}
+    def test_{{name}}_required(self):
+        """Test {{classname}} - {{name}} (required)"""
+        self.assertEqual(self.inst_req_only.{{name}}, {{{example}}}{{^example}}None{{/example}})
+
+{{/required}}
+{{/vars}}
+{{/isEnum}}
+{{#vars}}
+    def test_{{name}}_optional(self):
+        """Test {{classname}} - {{name}} (optional)"""
+        self.assertEqual(self.inst_req_and_optional.{{name}}, {{{example}}}{{^example}}None{{/example}})
+
+{{/vars}}
+{{/model}}
+{{/models}}
+
+if __name__ == '__main__':
+    unittest.main()
