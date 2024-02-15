@@ -6,7 +6,14 @@ import unittest
 
 {{#models}}
 {{#model}}
+import datetime  # noqa: F401
+import pprint
+import json
+
 import {{modelPackage}}
+
+
+ERROR_TO_EXAMPLE_VALUE = 'ERROR_TO_EXAMPLE_VALUE'
 
 
 class Test{{classname}}(unittest.TestCase):
@@ -40,13 +47,11 @@ class Test{{classname}}(unittest.TestCase):
     def test_to_str(self):
         """Test {{classname}} - to_str"""
         self.assertEqual(
-{{=<% %>=}}
-            "{<%#vars%>'<%baseName%>': %r<%^-last%>, <%/-last%><%/vars%>}" % (
-                <%#vars%>
-                self.inst_req_and_optional.<%name%>,
-                <%/vars%>
-            ),
-<%={{ }}=%>
+            pprint.pformat(self.inst_req_only.model_dump(by_alias=True)),
+            self.inst_req_only.to_str(),
+        )
+        self.assertEqual(
+            pprint.pformat(self.inst_req_and_optional.model_dump(by_alias=True)),
             self.inst_req_and_optional.to_str(),
         )
 
